@@ -7,3 +7,5 @@
 [x] MASA Blazor
 
 [x] Blazor
+
+[x] AngleSharp 爬虫
