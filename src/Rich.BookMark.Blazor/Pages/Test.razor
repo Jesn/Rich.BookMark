@@ -1,0 +1,63 @@
+@* @page "/" *@
+<h3>test</h3>
+
+
+@for (int i = 0; i < 10; i++)
+{
+    var index = @i;
+    var cardkey = $"card-{i}";
+    <MCard Color="basil" Flat @key="@cardkey">
+        <MCardText>@index --@i</MCardText>
+    </MCard>
+}
+
+@for (int i = 0; i < 10; i++)
+{
+    Console.WriteLine($"index:{i}");
+    var tabkey = $"tab-{i}";
+    var tabItemkey = $"tabitem-{i}";
+    var cardkey = $"card-{i}";
+    var index = @i;
+    
+    <MTabs @bind-Value="tab"
+           @key="@tabkey"
+           BackgroundColor="transparent"
+           Color="basil"
+           Grow>
+        @foreach (var item in items)
+        {
+            <MTab Value="@item">@item</MTab>
+        }
+    </MTabs>
+
+    <MTabsItems Value="@tab" @key="@tabItemkey">
+        @foreach (var item in items)
+        {
+            <MTabItem Value="@item">
+                <MCard Color="basil" Flat @key="@cardkey">
+                    <MCardText>@index --@i</MCardText>
+                </MCard>
+            </MTabItem>
+        }
+    </MTabsItems>
+}
+
+@code {
+
+    StringNumber tab;
+
+    List<string> items = new List<string>() {"petizers", "Entrees", "Deserts", "Cocktails"};
+
+    string text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(1);
+
+            StateHasChanged();
+        }
+    }
+    
+}

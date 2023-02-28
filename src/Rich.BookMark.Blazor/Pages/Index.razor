@@ -1,0 +1,152 @@
+﻿@page "/"
+@using Rich.BookMark.Crawler.BookMarkDto
+@using System.Text.Json.Serialization
+@using System.Text.Json
+@using System.Collections
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@inject JiZhiHeZiService _jiZhiHeZiService
+
+<PageTitle>Index</PageTitle>
+
+
+@if (dataLoaded && resultData != null)
+{
+    @foreach (var rootMenu in resultData.Menus.Where(x => x.ParentId == "0"))
+    {
+        if (rootMenu.Menus.Any())
+        {
+            var childMenus = rootMenu.Menus;
+            <h2 class="pt-5">@rootMenu.Title-@rootMenu.MenuId</h2>
+            var tabItemKey = $"tab-{rootMenu.MenuId}";
+
+            // tabItem = tabItemKey;
+
+            <MTabs @bind-Value="tabItem" Key="@tabItemKey">
+                @foreach (var childMenu in childMenus)
+                {
+                    var tab = childMenu;
+                    var tabValue = setTabValue(rootMenu.MenuId, tab.MenuId);
+                    <MTab Value="@tabValue">
+                        @* @setTabValue(rootMenu.MenuId, tab.MenuId) *@
+                        @tab.Title-@tab.MenuId-@(resultData.Details.Count(x => x.MenuId == tab.MenuId))
+                    </MTab>
+                }
+            </MTabs>
+            <MTabsItems Value="tabItem" Class="pt-5">
+                @foreach (var childMenu in childMenus)
+                {
+                    var tabItemKey = $"tabitem-{rootMenu.MenuId}-{childMenu.MenuId}";
+                    var tabValue = setTabValue(rootMenu.MenuId, childMenu.MenuId);
+                    <MTabItem Value="@tabValue" Key="@tabItemKey">
+                        <MRow>
+                            @{
+                                var marks = GetMarks(childMenu.MenuId);
+                            }
+                            @foreach (var item in marks)
+                            {
+                                <MCol Cols="2">
+                                    <MHover>
+                                        <MCard Outlined
+                                               @onclick="() => NavigateToDetails(item.Url_Source)"
+                                               @attributes="context.Attrs"
+                                               Class="@($"{(context.Hover ? "on-hover" : "")}")"
+                                               Elevation="@(context.Hover ? 16 : 0)">
+                                            <MListItem ThreeLine>
+                                                <MListItemAvatar>
+                                                    <MImage Src="@item.Icon"></MImage>
+                                                </MListItemAvatar>
+                                                <MListItemContent>
+                                                    <MListItemTitle Class="mb-1">
+                                                        <strong>@item.MenuId- @item.Title</strong>
+                                                    </MListItemTitle>
+                                                    <MListItemSubtitle>
+                                                        @item.Description
+                                                    </MListItemSubtitle>
+                                                </MListItemContent>
+                                            </MListItem>
+                                        </MCard>
+                                    </MHover>
+                                </MCol>
+                            }
+                        </MRow>
+                    </MTabItem>
+                }
+            </MTabsItems>
+        }
+    }
+}
+else
+{
+    <div>Loading...</div>
+}
+
+@code{
+
+    [Inject]
+    public NavigationManager nav { get; set; } = default;
+
+    StringNumber tabItem;
+
+
+    static ResultData resultData;
+
+    static string json;
+
+    static List<(string menuId,List<BookMarkDetailDto>)> items = new List<(string menuId, List<BookMarkDetailDto>)>();
+
+    static bool dataLoaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // if (dataLoaded)
+        //     return;
+
+        resultData = await _jiZhiHeZiService.GetJiZhiHeZiMenuAndDetails();
+        dataLoaded = true;
+
+        Console.WriteLine("加载了数据.........................");
+        Console.WriteLine($"总共获取Detail:{resultData.Details.Count}");
+
+
+    // foreach (var rootMenu in resultData.Menus)
+    // {
+    //     foreach (var childMenu in rootMenu.Menus)
+    //     {
+    //         var data = resultData.Details.Where(x => x.MenuId == childMenu.MenuId).ToList();
+    //         items.Add(new ValueTuple<string, List<BookMarkDetailDto>>(childMenu.MenuId, data));
+    //     }
+    // }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(1);
+
+            StateHasChanged();
+        }
+    }
+
+    string setTabValue(string rootMenuId, string childMenuId)
+    {
+        return $"tab-{rootMenuId}-{childMenuId}";
+    }
+
+    List<BookMarkDetailDto> GetMarks(string menuId)
+    {
+        var list = resultData.Details.Where(x => x.MenuId == menuId).ToList();
+        Console.WriteLine("list count:" + list.Count);
+        return list;
+    }
+
+
+    private void NavigateToDetails(string url)
+    {
+    // nav.NavigateTo($"/details/{id}");
+        nav.NavigateTo(url, true);
+    }
+
+
+
+}

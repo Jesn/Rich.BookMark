@@ -1,0 +1,104 @@
+﻿@page "/"
+@using Rich.BookMark.Crawler.BookMarkDto
+@using System.Text.Json.Serialization
+@using System.Text.Json
+@inject JiZhiHeZiService _jiZhiHeZiService
+
+<PageTitle>Index</PageTitle>
+    
+@foreach (var rootMenu in resultData.Menus.Where(x => x.ParentId == "0"))
+{
+    <h2>@rootMenu.Title</h2>
+    <MTabs @bind-Value="tabItem">
+
+        @foreach (var tab in rootMenu.Menus)
+        {
+            @* <div>@tab.Title</div> *@
+            <MTab Value="@tab.MenuId">@tab.Title</MTab>
+        }
+
+    </MTabs>
+    <div>@tabItem</div>
+    <MTabsItems Value="@tabItem" Class="pt-5">
+       
+        @foreach (var tab in rootMenu.Menus)
+        {
+            <MTabItem Value="@tab.MenuId">
+                <MRow>
+                    @foreach (var item in GetMarks(tab.MenuId))
+                    {
+                        <MCol Cols="3">
+                            <MHover>
+                                <MCard Outlined
+                                       @onclick="() => NavigateToDetails(item.DataId)"
+                                       @attributes="context.Attrs"
+                                       Class="@($"{(context.Hover ? "on-hover" : "")}")"
+                                       Elevation="@(context.Hover ? 16 : 0)">
+                                    <MListItem ThreeLine>
+                                        <MListItemAvatar>
+                                            <MImage Src="@item.Icon"></MImage>
+                                        </MListItemAvatar>
+                                        <MListItemContent>
+                                            <MListItemTitle Class="mb-1">
+                                                <strong> @item.Title</strong>
+                                            </MListItemTitle>
+                                            <MListItemSubtitle>
+                                                @item.Description
+                                            </MListItemSubtitle>
+                                        </MListItemContent>
+                                    </MListItem>
+                                </MCard>
+                            </MHover>
+                        </MCol>
+                    }
+                </MRow>
+            </MTabItem>
+        }
+    </MTabsItems>
+}
+
+
+@code{
+
+    [Inject]
+    public NavigationManager nav { get; set; } = default;
+
+    StringNumber tabItem;
+
+    //static List<string> tabs = new List<string>() { "常用站点", "生活专区" };
+
+    static ResultData resultData = new ResultData();
+    static string json;
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //  resultData = await _jiZhiHeZiService.GetJiZhiHeZiMenuAndDetails();
+    // }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        resultData = await _jiZhiHeZiService.GetJiZhiHeZiMenuAndDetails();
+        var options = new JsonSerializerOptions()
+        {
+            WriteIndented = true
+        };
+        json = JsonSerializer.Serialize(resultData.Menus, options);
+    }
+
+    
+
+    List<BookMarkDetailDto> GetMarks(string menuId)
+    {
+        var list = resultData.Details.Where(x => x.MenuId == menuId).ToList();
+        Console.WriteLine("list count:" + list.Count);
+        return list;
+    }
+
+    private void NavigateToDetails(string id)
+    {
+        nav.NavigateTo($"/details/{id}");
+    }
+
+
+
+}

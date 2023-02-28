@@ -1,0 +1,39 @@
+@using Rich.BookMark.Crawler.BookMarkDto
+@using Rich.BookMark.Crawler
+@using BlazorComponent
+@using Rich.BookMark.Blazor.Data
+@inject JiZhiHeZiService _jiZhiHeZiService
+
+<MNavigationDrawer Permanent App>
+    <Masa.Blazor.Presets.PSidebar @bind-Value="selectedKey"
+                                  Dense
+                                  Color="indigo"
+                                  Items="_menuData"
+                                  Title="m => m.Title"
+                                  Icon="m => m.Icon"
+                                  Key="m => m.MenuId"
+                                  Children="m => m.Menus"
+                                  TItem="MenuDto"
+                                  OnClick="Click">
+    </Masa.Blazor.Presets.PSidebar>
+</MNavigationDrawer>
+
+@code {
+
+    private static List<MenuDto> _menuData = new List<MenuDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _menuData = await _jiZhiHeZiService.GetMenus();
+    }
+
+    StringNumber selectedKey = "Management";
+
+    void Click(MenuDto item)
+    {
+    // code with clicked item
+    }
+
+
+
+}

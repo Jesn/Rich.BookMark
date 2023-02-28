@@ -1,0 +1,30 @@
+﻿@inherits LayoutComponentBase
+
+<MApp>
+    <MAppBar App Flat>
+        <span>
+            <a> <MIcon Small Color="red">fas fa-fire</MIcon>今日热榜</a>
+        </span>
+        <span class="pl-10">
+            <a><MIcon Small Color="red">fas fa-group</MIcon>资源群</a>
+        </span>
+        <MSpacer/>
+        <MButton>
+            <MIcon>fas fa-search</MIcon>
+        </MButton>
+    </MAppBar>
+    <Navigation/>
+    <MMain>
+        <MContainer Fluid>
+            <CascadingValue Value="this">
+                @Body
+            </CascadingValue>
+        </MContainer>
+    </MMain>
+</MApp>
+
+@code {
+
+   
+
+}

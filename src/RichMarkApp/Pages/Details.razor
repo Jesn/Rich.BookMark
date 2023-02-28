@@ -1,0 +1,12 @@
+@inherits RichCompontentBase
+
+@page "/details/{Id}"
+
+<h3>details - @Id</h3>
+
+@code {
+
+    [Parameter]
+    public string? Id { get; set; }
+
+}

@@ -1,0 +1,14 @@
+version: '3.4'
+services:
+  rich-blazor:
+    image: rich-bookmark
+    container_name: rich-bookmark
+    build:
+      context: .
+      dockerfile: ./src/Rich.BookMark.Blazor/Dockerfile
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "4033:80"
+      
+    
