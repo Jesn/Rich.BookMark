@@ -13,21 +13,19 @@ namespace Rich.BookMark.Crawler;
 /// </summary>
 public partial class CrawlerAppService : BookMarkAppService, ICrawlerAppService
 {
-    private readonly ICrawlerMenuRepository _crawlerMenuRepository;
+    // private readonly ICrawlerMenuRepository _crawlerMenuRepository;
     private readonly ICrawlerDetailRepository _crawlerDetailRepository;
 
-    private readonly ICrawlerMenuCache _crawlerMenuCache;
+    private readonly ICrawlerMenuManager _crawlerMenuManager;
     // private readonly ICrawlerDetailCache _crawlerDetailCache;
 
 
     public CrawlerAppService(
-        ICrawlerMenuRepository crawlerMenuRepository,
         ICrawlerDetailRepository crawlerDetailRepository,
-        ICrawlerMenuCache crawlerMenuCache)
+        ICrawlerMenuManager crawlerMenuManager)
     {
-        _crawlerMenuRepository = crawlerMenuRepository;
         _crawlerDetailRepository = crawlerDetailRepository;
-        _crawlerMenuCache = crawlerMenuCache;
+        _crawlerMenuManager = crawlerMenuManager;
     }
 
     /// <summary>
@@ -59,11 +57,11 @@ public partial class CrawlerAppService : BookMarkAppService, ICrawlerAppService
         {
             detail.SpiderSource = spiderSource;
         }
-
-        await _crawlerMenuRepository.DeleteMenuByDataSource(spiderSource);
+        
+        await _crawlerMenuManager.DeleteMenuByDataSource(spiderSource);
         await _crawlerDetailRepository.DeleteDetailByDataSource(spiderSource);
 
-        await _crawlerMenuRepository.InsertManyAsync(menus);
+        await _crawlerMenuManager.InsertManyAsync(menus);
         await _crawlerDetailRepository.InsertManyAsync(details);
     }
 
@@ -76,7 +74,7 @@ public partial class CrawlerAppService : BookMarkAppService, ICrawlerAppService
     {
         //var menus = await _crawlerMenuRepository.GetMenus(SpiderSourceEnum.jizhihezi);
 
-        var menus = await _crawlerMenuCache.GetMenusAsync(SpiderSourceEnum.jizhihezi);
+        var menus = await _crawlerMenuManager.GetMenusAsync(SpiderSourceEnum.jizhihezi);
         var rootMenus = menus.Where(x => x.ParentId == "0").ToList();
 
         var list_rootMenu = rootMenus.Select(rootMenu =>
