@@ -116,6 +116,8 @@ else
     //         items.Add(new ValueTuple<string, List<BookMarkDetailDto>>(childMenu.MenuId, data));
     //     }
     // }
+
+        await base.OnInitializedAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
